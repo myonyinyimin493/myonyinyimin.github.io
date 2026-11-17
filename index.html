@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Myo Nyi Nyi Min — AI Engineer</title>
+<meta name="description" content="Myo Nyi Nyi Min, AI Engineer. Real-time speech enhancement research and production systems for survivors of online abuse.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a speech signal runs through the page. Noise (coral) on the left of the hero is cleaned into signal (cobalt) on the right; the same two colours mark "problem" and "what I built" in every case study. */
+:root {
+  --paper: #F2F4F3;
+  --surface: #FFFFFF;
+  --ink: #0F1B2D;
+  --muted: #56627A;
+  --line: #D6DCE0;
+  --signal: #2741E8;
+  --noise: #E2553E;
+  --signal-soft: #E3E8FF;
+  --noise-soft: #FCE6E1;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0B1220; --surface: #121B2D; --ink: #E8ECF3; --muted: #9AA6BC; --line: #24314A;
+    --signal: #7C8FFF; --noise: #FF7A63; --signal-soft: #1C2550; --noise-soft: #3A1E1B;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0B1220; --surface: #121B2D; --ink: #E8ECF3; --muted: #9AA6BC; --line: #24314A;
+  --signal: #7C8FFF; --noise: #FF7A63; --signal-soft: #1C2550; --noise-soft: #3A1E1B;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--signal); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -0.02em; }
+.label { font-family: var(--mono); font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+
+/* Nav */
+nav { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
+.mark { font-family: var(--display); font-weight: 800; font-size: 20px; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+.mark i { width: 22px; height: 14px; display: inline-block; background:
+  linear-gradient(90deg, var(--noise) 0 45%, var(--signal) 55% 100%);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 14'%3E%3Cpath d='M1 7 L3 2 L5 12 L7 4 L9 9 L11 7 Q14 1 16.5 7 T22 7' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 14'%3E%3Cpath d='M1 7 L3 2 L5 12 L7 4 L9 9 L11 7 Q14 1 16.5 7 T22 7' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat; }
+.navlinks { display: flex; gap: 28px; align-items: center; font-size: 15px; }
+.navlinks a { text-decoration: none; color: var(--muted); }
+.navlinks a:hover { color: var(--ink); }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: 15px; text-decoration: none; border: 1.5px solid var(--ink); transition: transform .15s ease, background .15s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn.solid { background: var(--ink); color: var(--paper); }
+.btn.ghost:hover { background: var(--surface); }
+.navlinks .btn { color: var(--paper); }
+
+/* Hero */
+.hero { padding: 72px 0 32px; }
+.hero .label b { color: var(--signal); font-weight: 500; }
+.hero h1 { font-size: clamp(44px, 8vw, 104px); line-height: 0.95; font-weight: 800; margin: 18px 0 24px; }
+.hero h1 .n { color: var(--noise); }
+.hero h1 .s { color: var(--signal); }
+.hero p.lede { font-size: clamp(18px, 2vw, 21px); max-width: 640px; color: var(--muted); margin: 0 0 32px; }
+.hero p.lede strong { color: var(--ink); font-weight: 600; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.scope { margin-top: 48px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px 14px; }
+.scope-head, .scope-foot { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.scope-head span:first-child { color: var(--noise); }
+.scope-head span:last-child { color: var(--signal); }
+canvas#wave { display: block; width: 100%; height: 170px; margin: 8px 0; }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 56px 0 0; }
+.stat { padding: 22px 18px; border-left: 1px solid var(--line); }
+.stat:first-child { border-left: 0; padding-left: 0; }
+.stat b { display: block; font-family: var(--display); font-size: 34px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 14px; color: var(--muted); line-height: 1.4; display: block; margin-top: 4px; }
+
+/* Sections */
+section { padding: 88px 0 0; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 32px; }
+.sec-head h2 { font-size: clamp(32px, 4.5vw, 52px); font-weight: 800; }
+.sec-head p { color: var(--muted); max-width: 440px; margin: 0; }
+
+/* Work */
+.work { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
+.case { grid-column: span 3; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 28px; display: flex; flex-direction: column; gap: 16px; transition: transform .2s ease, box-shadow .2s ease; }
+.case:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -24px color-mix(in srgb, var(--ink) 45%, transparent); }
+.case.big { grid-column: span 6; display: grid; grid-template-columns: 1.1fr 1fr; gap: 32px; }
+.case.third { grid-column: span 2; }
+.case-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pill { font-family: var(--mono); font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pill.live { color: #12855A; border-color: color-mix(in srgb, #12855A 35%, transparent); }
+.pill.build { color: #B26A00; border-color: color-mix(in srgb, #B26A00 35%, transparent); }
+.pill.research { color: var(--signal); border-color: color-mix(in srgb, var(--signal) 35%, transparent); }
+:root[data-theme="dark"] .pill.live { color: #4FD49A; } :root[data-theme="dark"] .pill.build { color: #F2B04A; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pill.live { color: #4FD49A; } :root:not([data-theme="light"]) .pill.build { color: #F2B04A; } }
+.case h3 { font-size: 26px; font-weight: 700; line-height: 1.15; }
+.case.big h3 { font-size: 34px; }
+.org { font-size: 14px; color: var(--muted); }
+.ps { display: grid; gap: 10px; }
+.ps div { border-left: 3px solid; padding: 2px 0 2px 14px; font-size: 15.5px; }
+.ps .p { border-color: var(--noise); }
+.ps .s { border-color: var(--signal); }
+.ps em { font-style: normal; font-family: var(--mono); font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; display: block; color: var(--muted); }
+.case ul { margin: 0; padding-left: 18px; font-size: 15.5px; display: grid; gap: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+.chips span { font-family: var(--mono); font-size: 12px; padding: 4px 9px; border-radius: 6px; background: var(--paper); border: 1px solid var(--line); }
+
+/* RBAC mini map */
+.access { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 18px; align-self: start; }
+.access table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.access th, .access td { padding: 8px 6px; text-align: center; border-bottom: 1px solid var(--line); }
+.access th:first-child, .access td:first-child { text-align: left; }
+.access thead th { font-family: var(--mono); font-size: 12px; color: var(--muted); font-weight: 500; }
+.access tr:last-child td { border-bottom: 0; }
+.dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--signal); }
+.dot.off { background: transparent; border: 1.5px solid var(--line); }
+.access p { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+
+/* Metrics */
+.metrics { display: grid; gap: 10px; }
+.metric { display: grid; grid-template-columns: 70px 1fr auto; gap: 12px; align-items: center; font-family: var(--mono); font-size: 13px; }
+.bars { display: grid; gap: 3px; }
+.bar { height: 8px; border-radius: 4px; }
+.bar.a { background: var(--line); }
+.bar.b { background: var(--signal); }
+.metric strong { color: var(--signal); font-weight: 500; font-variant-numeric: tabular-nums; }
+.legend { display: flex; gap: 16px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+
+/* Project links: an empty href shows as "coming soon" */
+.links { display: flex; flex-wrap: wrap; gap: 8px; }
+.links a { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; text-decoration: none; padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--signal); color: var(--signal); transition: background .15s ease, color .15s ease; }
+.links a:hover { background: var(--signal); color: var(--surface); }
+.links a.soon { border-color: var(--line); color: var(--muted); border-style: dashed; cursor: default; pointer-events: none; transition: none; }
+.links a.soon::after { content: "· coming soon"; font-weight: 400; font-size: 12px; font-family: var(--mono); }
+
+/* Experience */
+.timeline { border-top: 1px solid var(--line); }
+.job { display: grid; grid-template-columns: 200px 1fr; gap: 24px; padding: 28px 0; border-bottom: 1px solid var(--line); }
+.job .when { font-family: var(--mono); font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.job h3 { font-size: 22px; font-weight: 700; }
+.job h3 span { color: var(--muted); font-weight: 400; }
+.job p { margin: 6px 0 0; color: var(--muted); max-width: 680px; }
+
+/* Research + skills */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 28px; }
+.panel h3 { font-size: 22px; margin-bottom: 10px; }
+.panel p { margin: 0 0 12px; color: var(--muted); }
+.cite { font-size: 15px; color: var(--ink) !important; }
+.skills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.skills h3 { font-size: 15px; font-family: var(--mono); font-weight: 500; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 10px; }
+.edu { display: grid; gap: 14px; }
+.edu div b { display: block; }
+.edu div span { color: var(--muted); font-size: 15px; }
+
+/* Contact */
+.contact { margin: 96px 0 0; padding: 64px 0; background: var(--ink); color: var(--paper); }
+.contact h2 { font-size: clamp(36px, 6vw, 72px); font-weight: 800; line-height: 1; }
+.contact h2 span { color: color-mix(in srgb, var(--signal) 55%, var(--paper)); }
+.contact p { color: color-mix(in srgb, var(--paper) 72%, transparent); max-width: 560px; }
+.contact .row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.contact .btn { border-color: var(--paper); color: var(--paper); }
+.contact .btn.solid { background: var(--paper); color: var(--ink); }
+.contact .email { font-family: var(--mono); font-size: 15px; margin-top: 16px; }
+footer { padding: 24px 0 40px; background: var(--ink); color: color-mix(in srgb, var(--paper) 55%, transparent); font-size: 13px; font-family: var(--mono); }
+
+@media (max-width: 900px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .stat { border-left: 0; padding-left: 0; border-bottom: 1px solid var(--line); }
+  .case, .case.third { grid-column: span 6; }
+  .case.big { grid-template-columns: 1fr; }
+  .two, .skills { grid-template-columns: 1fr; }
+  .job { grid-template-columns: 1fr; gap: 6px; }
+  .navlinks a:not(.btn) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .case, .btn { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="mark" href="#top" aria-label="Myo Nyi Nyi Min, home"><i></i>Nyi Nyi Min</a>
+    <div class="navlinks">
+      <a href="#work">Work</a>
+      <a href="#experience">Experience</a>
+      <a href="#research">Research</a>
+      <a href="#contact">Contact</a>
+      <a class="btn solid" href="Myo_Nyi_Nyi_Min_CV.pdf">Download CV</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="label">Myo Nyi Nyi Min · AI Engineer · <b>open to ML/AI Engineer roles</b></div>
+    <h1>I turn <span class="n">noise</span><br>into <span class="s">signal</span>.</h1>
+    <p class="lede">I build AI systems that hold up in the real world: <strong>real-time speech enhancement</strong> from my MSc at the University of Surrey, and <strong>five production systems</strong> I design and run alone for Stop Online Harm, a non-profit protecting survivors of online abuse in Southeast Asia.</p>
+    <div class="cta">
+      <a class="btn solid" href="#work">See my work</a>
+      <a class="btn ghost" href="#contact">Get in touch</a>
+    </div>
+
+    <div class="scope" aria-label="Animated waveform: noisy speech on the left is cleaned into clear speech on the right">
+      <div class="scope-head"><span>noisy input · SI-SNR 7.70 dB</span><span>Conv-TasNet + causal SE-Conformer</span><span>enhanced output · SI-SNR 10.78 dB</span></div>
+      <canvas id="wave"></canvas>
+      <div class="scope-foot"><span>VoiceBank-DEMAND · 16 kHz</span><span>RTF 0.10 · about 10× faster than real time</span></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b>5</b><span>systems built and run solo at Stop Online Harm</span></div>
+      <div class="stat"><b>4</b><span>country teams using my case dashboard</span></div>
+      <div class="stat"><b>+3.1 dB</b><span>SI-SNR gain from my hybrid speech model</span></div>
+      <div class="stat"><b>3+ yrs</b><span>shipping production software</span></div>
+      <div class="stat"><b>1</b><span>peer-reviewed paper, CIRP CATS 2026</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="work">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Selected work</h2>
+      <p>Each project starts with a real problem. Coral marks the problem, blue marks what I built.</p>
+    </div>
+
+    <div class="work">
+      <article class="case big">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="case-top"><span class="label">01 · Stop Online Harm</span><span class="pill live">Live in production</span></div>
+          <h3>Online Ambulance: reporting platform and case dashboard</h3>
+          <div class="ps">
+            <div class="p"><em>Problem</em>When I took over, the public reporting site was unusable and caseworkers in four countries had no safe way to share cases.</div>
+            <div class="s"><em>What I built</em>Rebuilt the reporting site in about 6 weeks, then a case dashboard where each team sees only its own country's cases.</div>
+          </div>
+          <ul>
+            <li>Secure report form with a case number for every survivor</li>
+            <li>Role-based access by country and role, plus a cross-border role for coordinators</li>
+            <li>Team notes with @mentions, an evidence tab, and an English/Burmese feedback form</li>
+            <li>Email moved from AWS SES to Postmark, with delivery and bounce tracking by webhook</li>
+          </ul>
+          <div class="chips"><span>AWS EC2</span><span>AWS Lambda</span><span>Cloudflare</span><span>Postmark</span><span>Uwazi</span><span>Webhooks</span><span>RBAC</span></div>
+          <div class="links"><a href="" target="_blank" rel="noopener">Visit live site ↗</a><a href="" target="_blank" rel="noopener">Watch demo video ↗</a></div>
+        </div>
+        <div class="access" aria-label="Who can see which country's cases">
+          <div class="label" style="margin-bottom:8px">Who sees which cases</div>
+          <table>
+            <thead><tr><th>Role</th><th>MMR</th><th>THA</th><th>LAO</th><th>KHM</th></tr></thead>
+            <tbody>
+              <tr><td>Helpline manager</td><td><span class="dot" title="Yes"></span></td><td><span class="dot" title="Yes"></span></td><td><span class="dot" title="Yes"></span></td><td><span class="dot" title="Yes"></span></td></tr>
+              <tr><td>Cross-border coordinator</td><td><span class="dot" title="Yes"></span></td><td><span class="dot" title="Yes"></span></td><td><span class="dot" title="Yes"></span></td><td><span class="dot" title="Yes"></span></td></tr>
+              <tr><td>Myanmar case taker</td><td><span class="dot" title="Yes"></span></td><td><span class="dot off" title="No"></span></td><td><span class="dot off" title="No"></span></td><td><span class="dot off" title="No"></span></td></tr>
+              <tr><td>Thailand case taker</td><td><span class="dot off" title="No"></span></td><td><span class="dot" title="Yes"></span></td><td><span class="dot off" title="No"></span></td><td><span class="dot off" title="No"></span></td></tr>
+              <tr><td>Programme staff</td><td colspan="4" style="font-size:13px;color:var(--muted)">Dashboard totals only</td></tr>
+            </tbody>
+          </table>
+          <p>Country is set on the user account, so new cases reach the right team without anyone reassigning them.</p>
+        </div>
+      </article>
+
+      <article class="case">
+        <div class="case-top"><span class="label">02 · Stop Online Harm</span><span class="pill build">In development</span></div>
+        <h3>OA Bot: RAG assistant for caseworkers</h3>
+        <div class="ps">
+          <div class="p"><em>Problem</em>When a new case arrives, caseworkers need to know the right, safe way to reply.</div>
+          <div class="s"><em>What I'm building</em>An internal assistant that suggests survivor-centred replies, grounded in UN and TFGBV guidance through retrieval-augmented generation.</div>
+        </div>
+        <div class="chips"><span>LLMs</span><span>RAG</span><span>UN &amp; TFGBV guidance</span></div>
+      </article>
+
+      <article class="case">
+        <div class="case-top"><span class="label">03 · Stop Online Harm</span><span class="pill build">In development</span></div>
+        <h3>Evidence archiving system</h3>
+        <div class="ps">
+          <div class="p"><em>Problem</em>Once harmful posts are taken down, survivors lose the evidence they need for legal action.</div>
+          <div class="s"><em>What I'm building</em>A system that captures and preserves social media content from the links survivors submit, before it disappears.</div>
+        </div>
+        <div class="chips"><span>Evidence preservation</span><span>Social media</span></div>
+      </article>
+
+      <article class="case">
+        <div class="case-top"><span class="label">04 · MSc dissertation</span><span class="pill research">Research · Merit</span></div>
+        <h3>Real-time speech enhancement</h3>
+        <div class="ps">
+          <div class="p"><em>Problem</em>Conv-TasNet is fast, but its convolutions miss long-range context in changing noise.</div>
+          <div class="s"><em>What I built</em>A hybrid that adds causal SE-Conformer blocks to the separator, so it still streams in real time.</div>
+        </div>
+        <div class="metrics" aria-label="Baseline versus hybrid results">
+          <div class="legend"><span><i style="background:var(--line)"></i>Conv-TasNet</span><span><i style="background:var(--signal)"></i>Hybrid (mine)</span></div>
+          <div class="metric"><span>SI-SNR</span><div class="bars"><div class="bar a" style="width:62%"></div><div class="bar b" style="width:87%"></div></div><strong>7.70 → 10.78 dB</strong></div>
+          <div class="metric"><span>STOI</span><div class="bars"><div class="bar a" style="width:83%"></div><div class="bar b" style="width:88%"></div></div><strong>0.828 → 0.878</strong></div>
+          <div class="metric"><span>PESQ</span><div class="bars"><div class="bar a" style="width:30%"></div><div class="bar b" style="width:36%"></div></div><strong>1.36 → 1.65</strong></div>
+        </div>
+        <div class="chips"><span>PyTorch</span><span>Conv-TasNet</span><span>Conformer</span><span>Self-attention</span><span>VoiceBank-DEMAND</span></div>
+        <div class="links"><a href="" target="_blank" rel="noopener">Try the demo ↗</a><a href="https://github.com/myonyinyimin493/Real_time_auido_enhancement" target="_blank" rel="noopener">View code ↗</a></div>
+      </article>
+
+      <article class="case">
+        <div class="case-top"><span class="label">05 · Stop Online Harm</span><span class="pill build">In design</span></div>
+        <h3>Finance systems</h3>
+        <div class="ps">
+          <div class="p"><em>Problem</em>The organisation needs one reliable place to manage expense claims, payments and grants.</div>
+          <div class="s"><em>What I'm building</em>An expense claim and payment system and a grants portal, starting from the system architecture.</div>
+        </div>
+        <div class="chips"><span>System architecture</span></div>
+      </article>
+
+      <article class="case third">
+        <div class="case-top"><span class="label">06 · University of Surrey</span></div>
+        <h3>Speech emotion recognition</h3>
+        <p style="margin:0;color:var(--muted);font-size:15.5px">Classified emotion from MFCCs and other acoustic features, comparing several classical ML models.</p>
+        <div class="chips"><span>Scikit-learn</span><span>librosa</span></div>
+      </article>
+      <article class="case third">
+        <div class="case-top"><span class="label">07 · University of Surrey</span></div>
+        <h3>Knife identification with CNNs</h3>
+        <p style="margin:0;color:var(--muted);font-size:15.5px">Trained CNN image classifiers, from preprocessing through evaluation and error analysis.</p>
+        <div class="chips"><span>PyTorch</span><span>CNNs</span></div>
+      </article>
+      <article class="case third">
+        <div class="case-top"><span class="label">08 · LSBU research</span></div>
+        <h3>Human–robot task allocation</h3>
+        <p style="margin:0;color:var(--muted);font-size:15.5px">Framework for deciding which disassembly tasks suit operators, robots or both.</p>
+        <div class="chips"><span>Data analysis</span><span>Published</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="wrap">
+    <div class="sec-head"><h2>Experience</h2><p>From freelance web apps to running an organisation's whole platform.</p></div>
+    <div class="timeline">
+      <div class="job"><div class="when">Jul 2026 – now</div><div><h3>AI Engineer <span>· Stop Online Harm</span></h3><p>Sole engineer. I design, build, deploy and secure the reporting platform, case dashboard, OA bot, archiving and finance systems, and advise on safe AI adoption.</p></div></div>
+      <div class="job"><div class="when">Jun 2023 – Jun 2025</div><div><h3>Full-Stack Developer <span>· Veag-It Ltd, London</span></h3><p>Built and maintained production web and mobile apps with React, Node.js/Express and MongoDB in an Agile team, including REST APIs and error handling that cut runtime exceptions.</p></div></div>
+      <div class="job"><div class="when">2024 – 2025</div><div><h3>Research Collaborator <span>· London South Bank University</span></h3><p>Human-Centred Industrial Intelligence Lab. Data analysis, task-allocation framework and manuscript for a CIRP CATS 2026 paper.</p></div></div>
+      <div class="job"><div class="when">May 2019 – May 2020</div><div><h3>Freelance Developer <span>· Ku Tho Ltd</span></h3><p>Built a restaurant management web app with PHP, JavaScript and MySQL in Scrum sprints.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="research">
+  <div class="wrap">
+    <div class="sec-head"><h2>Research and education</h2></div>
+    <div class="two">
+      <div class="panel">
+        <span class="label">Publication · accepted</span>
+        <h3 style="margin-top:8px">Human–Robot Cooperation Suitability Assessment for Disassembly Systems</h3>
+        <p class="cite">Alkan, B., Hartono, N., Webb, L., <b>Min, M. N. N.</b>, &amp; Kaniappan, M. C. (2026). <i>Procedia CIRP</i> (CIRP CATS 2026), Elsevier.</p>
+        <div class="links"><a href="" target="_blank" rel="noopener">Read the paper ↗</a></div>
+        <span class="label" style="display:block;margin-top:20px">MSc dissertation · 2025</span>
+        <h3 style="margin-top:8px">AI-Powered Real-Time Speech Source Separation &amp; Enhancement</h3>
+        <p>Supervised by Prof. Wenwu Wang, University of Surrey.</p>
+      </div>
+      <div class="panel edu">
+        <span class="label">Education</span>
+        <div><b>MSc Artificial Intelligence · Merit</b><span>University of Surrey · 2024 – 2025</span></div>
+        <div><b>BSc (Hons) Computer Science · 2:1</b><span>London South Bank University · 2021 – 2022</span></div>
+        <div><b>HND in Computing · Distinction</b><span>Gusto University, Yangon · 2018 – 2020</span></div>
+      </div>
+    </div>
+
+    <div class="skills" style="margin-top:20px">
+      <div class="panel"><h3>ML and AI</h3><p>PyTorch, TensorFlow, Scikit-learn, LLMs and RAG, speech and audio, computer vision, NLP, NumPy, Pandas</p></div>
+      <div class="panel"><h3>Cloud and backend</h3><p>AWS (EC2, S3, Lambda, SES), Docker, Linux, Cloudflare, Node.js, Flask, Django, MongoDB, MySQL</p></div>
+      <div class="panel"><h3>Languages and frontend</h3><p>Python, JavaScript/TypeScript, Java, C#, SQL, React, REST APIs, Git</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="contact" id="contact">
+  <div class="wrap">
+    <h2>Let's build something <span>that works</span>.</h2>
+    <p>I'm looking for ML/AI Engineer roles where models have to work for real people. Based in London.</p>
+    <div class="row">
+      <a class="btn solid" href="mailto:nyinyiuk1998@gmail.com">Email me</a>
+      <a class="btn" href="https://github.com/myonyinyimin493" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn" href="Myo_Nyi_Nyi_Min_CV.pdf">Download CV</a>
+    </div>
+    <div class="email">nyinyiuk1998@gmail.com</div>
+  </div>
+</div>
+<footer><div class="wrap">© 2026 Myo Nyi Nyi Min</div></footer>
+
+<script>
+(function () {
+  document.querySelectorAll('.links a').forEach(a => {
+    if (!a.getAttribute('href')) { a.classList.add('soon'); a.setAttribute('aria-disabled', 'true'); a.setAttribute('tabindex', '-1'); }
+  });
+  const cv = document.getElementById('wave');
+  const ctx = cv.getContext('2d');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, colors = {};
+  function readColors() {
+    const s = getComputedStyle(document.documentElement);
+    colors = { noise: s.getPropertyValue('--noise').trim(), signal: s.getPropertyValue('--signal').trim(), line: s.getPropertyValue('--line').trim(), muted: s.getPropertyValue('--muted').trim() };
+  }
+  function size() {
+    const dpr = window.devicePixelRatio || 1;
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  // fixed noise table so the noisy side looks like real noise, not random flicker
+  const N = 2048, noise = new Float32Array(N);
+  let seed = 7; for (let i = 0; i < N; i++) { seed = (seed * 16807) % 2147483647; noise[i] = (seed / 2147483647) * 2 - 1; }
+  function speech(x, t) {
+    // syllable-like envelope with a few harmonics
+    const env = Math.pow(Math.max(0, Math.sin(x * 0.018 - t * 0.9)), 1.6) * 0.75 + 0.12;
+    const f = x * 0.11 - t * 6;
+    return env * (Math.sin(f) * 0.6 + Math.sin(f * 2.03) * 0.25 + Math.sin(f * 3.1) * 0.12);
+  }
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+    const mid = H / 2, amp = H * 0.42, split = W * 0.5, fade = Math.min(90, W * 0.08);
+    ctx.strokeStyle = colors.line; ctx.lineWidth = 1; ctx.setLineDash([4, 6]);
+    ctx.beginPath(); ctx.moveTo(split, 6); ctx.lineTo(split, H - 6); ctx.stroke(); ctx.setLineDash([]);
+    const shift = Math.floor(t * 120);
+    function path(from, to, noisy) {
+      ctx.beginPath();
+      for (let x = from; x <= to; x += 1.5) {
+        const clean = speech(x, t);
+        let k = 0;
+        if (noisy) k = 1; else k = 0;
+        if (x > split - fade && x < split + fade) { const p = (x - (split - fade)) / (2 * fade); k = noisy ? 1 - p : 1 - p; }
+        const n = noise[(Math.floor(x) + shift) % N] * 0.55 + noise[(Math.floor(x * 1.7) + shift * 2) % N] * 0.25;
+        const y = mid - (clean + n * k) * amp;
+        x === from ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+    }
+    ctx.lineWidth = 1.6; ctx.lineJoin = 'round';
+    ctx.strokeStyle = colors.noise; path(0, split + fade, true); ctx.stroke();
+    ctx.lineWidth = 2.4;
+    ctx.strokeStyle = colors.signal; path(split - fade * 0.2, W, false); ctx.stroke();
+  }
+  let start = performance.now(), raf = 0, visible = true;
+  function loop(now) { draw((now - start) / 1000); raf = requestAnimationFrame(loop); }
+  function render() { cancelAnimationFrame(raf); if (reduce || !visible) draw(1.2); else raf = requestAnimationFrame(loop); }
+  readColors(); size(); render();
+  window.addEventListener('resize', () => { size(); if (reduce) draw(1.2); });
+  new MutationObserver(() => { readColors(); if (reduce) draw(1.2); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); if (reduce) draw(1.2); });
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; render(); }).observe(cv);
+})();
+</script>
+</body>
+</html>
